@@ -26,6 +26,7 @@ try {
       created_at TIMESTAMPTZ NOT NULL DEFAULT now()
     );
   `);
+  await client.query("ALTER TABLE orders ADD COLUMN IF NOT EXISTS product_id TEXT;");
   await client.query(paymentsSchemaSql("postgres"));
   console.log("Database tables are ready.");
 } finally {

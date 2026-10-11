@@ -3,12 +3,16 @@
 import { randomUUID } from "node:crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { product } from "@/lib/catalog";
+import { findProduct } from "@/lib/catalog";
 import { db } from "@/lib/db";
 import { VISITOR_COOKIE } from "@/lib/orders";
 
 /** Creates the order first; its id is the OpenReceive reference. */
-export async function buy(): Promise<void> {
+export async function buy(productId: string): Promise<void> {
+  // The price always comes from the server-side catalog, never the browser.
+  const product = typeof productId === "string" ? findProduct(productId) : undefined;
+  if (!product) throw new Error("Unknown product.");
+
   const jar = await cookies();
   let visitor = jar.get(VISITOR_COOKIE)?.value;
   if (!visitor) {
@@ -23,8 +27,8 @@ export async function buy(): Promise<void> {
   }
   const id = randomUUID();
   await db().query(
-    "INSERT INTO orders (id, visitor, product_name, amount, currency) VALUES ($1, $2, $3, $4, $5)",
-    [id, visitor, product.name, product.price, product.currency],
+    "INSERT INTO orders (id, visitor, product_id, product_name, amount, currency) VALUES ($1, $2, $3, $4, $5, $6)",
+    [id, visitor, product.id, product.name, product.price, product.currency],
   );
   redirect(`/checkout/${id}`);
 }

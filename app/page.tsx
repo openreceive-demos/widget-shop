@@ -1,17 +1,22 @@
-import { product } from "@/lib/catalog";
-import { buy } from "./actions";
+import { ProductCard } from "@/components/product-card";
+import { products } from "@/lib/catalog";
 
 export default function Home() {
   return (
-    <main>
-      <h1>{product.name}</h1>
-      <p>
-        ${product.price} {product.currency}, paid in bitcoin over Lightning, straight to the shop's
-        wallet.
-      </p>
-      <form action={buy}>
-        <button type="submit">Buy</button>
-      </form>
+    <main className="container">
+      <section className="hero">
+        <p className="eyebrow">Small things, well made</p>
+        <h1>Widgets for every desk, pocket and shelf.</h1>
+        <p className="hero-copy">
+          Pick a widget and hit Buy. Pay in bitcoin over Lightning, straight to the shop&apos;s
+          wallet.
+        </p>
+      </section>
+      <section aria-label="Products" className="product-grid">
+        {products.map((product, index) => (
+          <ProductCard key={product.id} product={product} priority={index < 3} />
+        ))}
+      </section>
     </main>
   );
 }

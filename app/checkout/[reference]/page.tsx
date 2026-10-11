@@ -1,4 +1,6 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
+import { formatPrice } from "@/lib/catalog";
 import { findOwnOrder } from "@/lib/orders";
 import { OrderCheckout } from "./order-checkout";
 
@@ -10,14 +12,29 @@ export default async function CheckoutPage({ params }: { params: Promise<{ refer
   const { reference } = await params;
   const order = await findOwnOrder(reference);
   if (!order) notFound();
+  const paid = order.state === "paid";
   return (
-    <main>
-      <h1>{order.product_name}</h1>
-      <p>
-        ${order.amount} {order.currency} ·{" "}
-        {order.state === "paid" ? "Paid, thank you." : "Awaiting payment"}
-      </p>
-      <OrderCheckout reference={order.id} />
+    <main className="container checkout">
+      <Link href="/" className="back-link">
+        &larr; Back to the shop
+      </Link>
+      <div className="checkout-summary">
+        <div>
+          <p className="eyebrow">Order {order.id.slice(0, 8)}</p>
+          <h1>{order.product_name}</h1>
+        </div>
+        <div className="checkout-total">
+          <p className="product-price">
+            {formatPrice(order.amount)} {order.currency}
+          </p>
+          <p className={paid ? "status status-paid" : "status"}>
+            {paid ? "Paid, thank you." : "Awaiting payment"}
+          </p>
+        </div>
+      </div>
+      <div className="checkout-widget">
+        <OrderCheckout reference={order.id} />
+      </div>
     </main>
   );
 }
